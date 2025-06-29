@@ -21,6 +21,9 @@ filled from the CSV file:
 python tracker.py add --name "Apple" --csv /path/to/food.csv
 ```
 
+The application expects a `food.csv` file containing nutrient data. Place your file at `data/food.csv` or provide its path with `--csv`.
+
+
 To inspect the values stored in the CSV for a food without adding it to
 the log, use the `lookup` command:
 
@@ -56,4 +59,13 @@ Run the tests with:
 
 ```bash
 python -m unittest
+```
+
+## Setup
+
+Create a conda environment using the provided `requirements.txt` file:
+
+```bash
+conda create --name calorie_tracker --file requirements.txt
+conda activate calorie_tracker
 ```

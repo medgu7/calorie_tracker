@@ -17,11 +17,21 @@ class TestTracker(unittest.TestCase):
     def setUp(self):
         # ensure log file is clear
         reset(None)
+        Path("data").mkdir(exist_ok=True)
+        self.csv_path = Path("data/food.csv")
+        self.csv_path.write_text(
+            "Description,Data.Kilocalories,Data.Carbohydrate,Data.Protein,Data.Fat.Total Lipid,Data.Vitamins.Vitamin C\n"
+            "Apple,95,25,0.5,0.3,8.4\n"
+            "Banana,105,27,1.3,0.4,10\n"
+            "Rice,130,28,2.7,0.3,0\n"
+        )
 
     def tearDown(self):
         # clean up log file
         if os.path.exists('daily_log.json'):
             os.remove('daily_log.json')
+        if hasattr(self, 'csv_path') and self.csv_path.exists():
+            self.csv_path.unlink()
 
     def test_parse_micros(self):
         result = parse_micros(['vit_c=10', 'iron=2'])
