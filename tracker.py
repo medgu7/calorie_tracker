@@ -6,11 +6,8 @@ from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 
-LOG_FILE = Path('daily_log.json')
-DEFAULT_CSV = Path('data/food.csv')
-from typing import Dict, List, Tuple
-
-LOG_FILE = Path('daily_log.json')
+LOG_FILE = Path("daily_log.json")
+DEFAULT_CSV = Path("data/food.csv")
 
 @dataclass
 class FoodItem:
@@ -77,29 +74,30 @@ def get_totals() -> Tuple[float, float, float, float, Dict[str, float]]:
 
 
 def add_food(args: argparse.Namespace) -> None:
+    """Add a food entry to the daily log."""
     items = load_log()
-    # if a CSV is provided, attempt to fill missing values from it
-    if args.csv:
-        row = find_food_row(args.name, Path(args.csv))
-        if row:
-            if args.calories is None:
-                args.calories = float(row.get('Data.Kilocalories', 0) or 0)
-            if args.carbs is None:
-                args.carbs = float(row.get('Data.Carbohydrate', 0) or 0)
-            if args.protein is None:
-                args.protein = float(row.get('Data.Protein', 0) or 0)
-            if args.fat is None:
-                args.fat = float(row.get('Data.Fat.Total Lipid', 0) or 0)
-            if not args.micro:
-                # pick remaining nutrient columns as micros
-                for k, v in row.items():
-                    if k.startswith('Data.') and k not in (
-                        'Data.Kilocalories',
-                        'Data.Carbohydrate',
-                        'Data.Protein',
-                        'Data.Fat.Total Lipid',
-                    ) and v:
-                        args.micro.append(f"{k}={v}")
+
+    csv_path = Path(args.csv) if getattr(args, "csv", None) else DEFAULT_CSV
+    row = find_food_row(args.name, csv_path)
+    if row:
+        if args.calories is None:
+            args.calories = float(row.get("Data.Kilocalories", 0) or 0)
+        if args.carbs is None:
+            args.carbs = float(row.get("Data.Carbohydrate", 0) or 0)
+        if args.protein is None:
+            args.protein = float(row.get("Data.Protein", 0) or 0)
+        if args.fat is None:
+            args.fat = float(row.get("Data.Fat.Total Lipid", 0) or 0)
+        if not args.micro:
+            for k, v in row.items():
+                if k.startswith("Data.") and k not in (
+                    "Data.Kilocalories",
+                    "Data.Carbohydrate",
+                    "Data.Protein",
+                    "Data.Fat.Total Lipid",
+                ) and v:
+                    args.micro.append(f"{k}={v}")
+
     micros = parse_micros(args.micro)
     food = FoodItem(
         name=args.name,
@@ -107,13 +105,6 @@ def add_food(args: argparse.Namespace) -> None:
         carbs=args.carbs or 0,
         protein=args.protein or 0,
         fat=args.fat or 0,
-    micros = parse_micros(args.micro)
-    food = FoodItem(
-        name=args.name,
-        calories=args.calories,
-        carbs=args.carbs,
-        protein=args.protein,
-        fat=args.fat,
         micros=micros,
     )
     items.append(food)
@@ -158,13 +149,13 @@ def build_parser() -> argparse.ArgumentParser:
     add_p.add_argument("--carbs", type=float)
     add_p.add_argument("--protein", type=float)
     add_p.add_argument("--fat", type=float)
-    add_p.add_argument("--micro", action="append", default=[], help="micronutrient in name=value form")
+    add_p.add_argument(
+        "--micro",
+        action="append",
+        default=[],
+        help="micronutrient in name=value form",
+    )
     add_p.add_argument("--csv", help="CSV file to look up nutrient data")
-    add_p.add_argument("--calories", type=float, required=True)
-    add_p.add_argument("--carbs", type=float, required=True)
-    add_p.add_argument("--protein", type=float, required=True)
-    add_p.add_argument("--fat", type=float, required=True)
-    add_p.add_argument("--micro", action="append", default=[], help="micronutrient in name=value form")
     add_p.set_defaults(func=add_food)
 
     summary_p = subparsers.add_parser("summary", help="Show daily totals")

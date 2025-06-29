@@ -2,7 +2,7 @@ import http.server
 import socketserver
 import urllib.parse
 from typing import Dict
-from tracker import add_food, reset, get_totals, parse_micros_string
+from tracker import add_food, reset, get_totals, DEFAULT_CSV
 
 PORT = 8000
 
@@ -18,11 +18,6 @@ def render_index() -> bytes:
       <h2>Add Food</h2>
       <form action='/add' method='post'>
         Name: <input name='name'><br>
-        Calories: <input name='calories' type='number' step='any'><br>
-        Carbs: <input name='carbs' type='number' step='any'><br>
-        Protein: <input name='protein' type='number' step='any'><br>
-        Fat: <input name='fat' type='number' step='any'><br>
-        Micros (key=value comma or space separated): <input name='micros'><br>
         <button type='submit'>Add</button>
       </form>
 
@@ -59,17 +54,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if self.path == '/add':
             class Args:
                 pass
+
             args = Args()
             args.name = params.get('name', [''])[0]
-            args.calories = float(params.get('calories', ['0'])[0] or 0)
-            args.carbs = float(params.get('carbs', ['0'])[0] or 0)
-            args.protein = float(params.get('protein', ['0'])[0] or 0)
-            args.fat = float(params.get('fat', ['0'])[0] or 0)
-            micro_str = params.get('micros', [''])[0]
+            args.calories = None
+            args.carbs = None
+            args.protein = None
+            args.fat = None
             args.micro = []
-            micros = parse_micros_string(micro_str)
-            # convert dict to list for add_food
-            args.micro = [f"{k}={v}" for k,v in micros.items()]
+            args.csv = str(DEFAULT_CSV)
             add_food(args)
         elif self.path == '/reset':
             reset(None)
