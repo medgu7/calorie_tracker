@@ -1,6 +1,7 @@
 import os
 import unittest
 import json
+from pathlib import Path
 from tracker import (
     parse_micros,
     parse_micros_string,
@@ -9,6 +10,7 @@ from tracker import (
     reset,
     load_log,
     get_totals,
+    find_food_row,
 )
 
 class TestTracker(unittest.TestCase):
@@ -40,6 +42,7 @@ class TestTracker(unittest.TestCase):
         args.protein = 0.5
         args.fat = 0.3
         args.micro = ['vit_c=8']
+        args.csv = None
         add_food(args)
 
         items = load_log()
@@ -59,6 +62,27 @@ class TestTracker(unittest.TestCase):
 
         totals = get_totals()
         self.assertEqual(totals[0], 95)  # calories
+
+    def test_find_food_row(self):
+        row = find_food_row('Apple', Path('data/food.csv'))
+        self.assertIsNotNone(row)
+        self.assertEqual(row['Description'], 'Apple')
+
+    def test_add_from_csv(self):
+        class Args:
+            pass
+        args = Args()
+        args.name = 'Banana'
+        args.calories = None
+        args.carbs = None
+        args.protein = None
+        args.fat = None
+        args.micro = []
+        args.csv = 'data/food.csv'
+        add_food(args)
+        items = load_log()
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].calories, 105)
 
 if __name__ == '__main__':
     unittest.main()
