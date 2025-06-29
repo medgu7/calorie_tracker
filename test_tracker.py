@@ -94,5 +94,22 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0].calories, 105)
 
+    def test_add_from_default_csv(self):
+        class Args:
+            pass
+
+        args = Args()
+        args.name = 'Rice'
+        args.calories = None
+        args.carbs = None
+        args.protein = None
+        args.fat = None
+        args.micro = []
+        args.csv = None
+        add_food(args)
+        items = load_log()
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0].carbs, 28)
+
 if __name__ == '__main__':
     unittest.main()
