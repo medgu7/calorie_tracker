@@ -8,6 +8,9 @@ from typing import Dict, List, Tuple, Optional
 
 LOG_FILE = Path('daily_log.json')
 DEFAULT_CSV = Path('data/food.csv')
+from typing import Dict, List, Tuple
+
+LOG_FILE = Path('daily_log.json')
 
 @dataclass
 class FoodItem:
@@ -104,6 +107,13 @@ def add_food(args: argparse.Namespace) -> None:
         carbs=args.carbs or 0,
         protein=args.protein or 0,
         fat=args.fat or 0,
+    micros = parse_micros(args.micro)
+    food = FoodItem(
+        name=args.name,
+        calories=args.calories,
+        carbs=args.carbs,
+        protein=args.protein,
+        fat=args.fat,
         micros=micros,
     )
     items.append(food)
@@ -150,6 +160,11 @@ def build_parser() -> argparse.ArgumentParser:
     add_p.add_argument("--fat", type=float)
     add_p.add_argument("--micro", action="append", default=[], help="micronutrient in name=value form")
     add_p.add_argument("--csv", help="CSV file to look up nutrient data")
+    add_p.add_argument("--calories", type=float, required=True)
+    add_p.add_argument("--carbs", type=float, required=True)
+    add_p.add_argument("--protein", type=float, required=True)
+    add_p.add_argument("--fat", type=float, required=True)
+    add_p.add_argument("--micro", action="append", default=[], help="micronutrient in name=value form")
     add_p.set_defaults(func=add_food)
 
     summary_p = subparsers.add_parser("summary", help="Show daily totals")
